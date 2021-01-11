@@ -1,0 +1,58 @@
+// import 'package:apppengelolaan/dataMajelis/api/api_dataMajelis.dart';
+// import 'package:apppengelolaan/src/public.dart';
+// import 'package:apppengelolaan/src/view/cardSurat.dart';
+// import 'package:apppengelolaan/src/view/itemsDetail.dart';
+// import 'package:flutter/material.dart';
+// import 'package:loadmore/loadmore.dart';
+// import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+// class ListItemData {
+//   final Function callbackRemoveAtIndex;
+//   final Function callbackNextPage;
+//   final int maxData;
+//   ListItemData(this.callbackNextPage, this.maxData,
+//       {this.callbackRemoveAtIndex});
+
+//   Widget buildListItemData({
+//     @required BuildContext context,
+//     @required DataMajelis data,
+//     @required bool isError,
+//     Color loaderColor,
+//   }) {
+//     if (isError) return viewErrorLoadData(context);
+//     if (data.data == null) {
+//       return viewLoaderData(context, color: loaderColor);
+//     } else if (data.data.tMajelis.length == 0) {
+//       return viewNoData(context);
+//     } else {
+//       return LoadMore(
+//         whenEmptyLoad: true,
+//         isFinish: data.data.tMajelis.length >= maxData,
+//         textBuilder: textLoadMore,
+//         onLoadMore: () => callbackNextPage(),
+//         child: ListView.builder(
+//           itemBuilder: (context, index) {
+//             String namaMajelis = data.data.tMajelis[index].namaMajelis;
+//             namaMajelis = namaMajelis == null ? "" : namaMajelis + " - ";
+//             return Container(
+//                 margin: EdgeInsets.only(
+//                     bottom: index == data.data.tMajelis.length - 1 ? 10 : 0),
+//                 child: CardSurat(
+//                   items: [
+//                     ItemsDetail(Icons.person, "Nama Majelis",
+//                         data.data.tMajelis[index].namaMajelis),
+//                     ItemsDetail(MdiIcons.poundBox, "Alamat Majelis",
+//                         data.data.tMajelis[index].alamatMajelis),
+//                     ItemsDetail(MdiIcons.calendar, "Tanggal Majelis",
+//                         data.data.tMajelis[index].created),
+//                   ],
+//                 )
+//                 // _buildCard(data, index, context)
+//                 );
+//           },
+//           itemCount: data.data.tMajelis.length,
+//         ),
+//       );
+//     }
+//   }
+// }

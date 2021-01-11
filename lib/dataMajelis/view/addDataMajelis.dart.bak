@@ -1,0 +1,200 @@
+import 'package:apppengelolaan/src/public.dart';
+import 'package:apppengelolaan/src/view/appbar.dart';
+import 'package:argon_buttons_flutter/argon_buttons_flutter.dart';
+import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:intl/intl.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+class AddMajelis extends StatefulWidget {
+  @override
+  _AddMajelisState createState() => _AddMajelisState();
+}
+
+class _AddMajelisState extends State<AddMajelis> {
+  final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+  bool isError = false;
+  bool isSaving = false;
+
+  void tanyakeluar() {
+    if (isError) {
+      Navigator.of(context).pop();
+    } else {
+      showDialogTanya(
+          context: context,
+          colorButtonOK: Colors.red,
+          colorButtonCancel: Colors.green,
+          description: "Data Anda Tidak Tersimpan\nLanjutkan ?",
+          title: "Keluar",
+          onPressOK: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+          onPressCancel: () {
+            Navigator.of(context).pop();
+          });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppbarMain(
+        title: "Tambah Majelis",
+        showOnlySearchIcon: true,
+      ),
+      body: _buildForm(context),
+    );
+  }
+
+  Widget _buildButton(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerRight,
+      child: FittedBox(
+        fit: BoxFit.fitWidth,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ArgonButton(
+              height: 50,
+              width: 100,
+              borderRadius: 10,
+              elevation: 0,
+              color: Colors.red,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.cancel,
+                    color: Colors.white,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "Batal",
+                    style: TextStyle().copyWith(color: Colors.white),
+                  )
+                ],
+              ),
+              onTap: (startLoading, stopLoading, btnState) {
+                if (!isSaving) tanyakeluar();
+              },
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            ArgonButton(
+              height: 50,
+              width: 100,
+              borderRadius: 10,
+              elevation: 0,
+              color: Theme.of(context).primaryColor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    MdiIcons.contentSave,
+                    color: Colors.white,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "Simpan",
+                    style: TextStyle().copyWith(color: Colors.white),
+                  )
+                ],
+              ),
+              roundLoadingShape: false,
+              minWidth: 100,
+              loader: SpinKitThreeBounce(
+                color: Colors.white,
+                size: 30,
+              ),
+              onTap: (startLoading, stopLoading, btnState) async {
+                print(_fbKey.currentState.value);
+                if (btnState == ButtonState.Idle) {
+                  print(_fbKey.currentState.value);
+                  // print(_selectedUnits.map((e) => e.id.trim()).join(","));
+
+                  if (_fbKey.currentState.saveAndValidate()) {
+                    setState(() {
+                      isSaving = true;
+                    });
+                    startLoading();
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildForm(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        FormBuilderTextField(
+          attribute: "nama_masjid",
+          readOnly: true,
+          textInputAction: TextInputAction.next,
+          validators: [
+            FormBuilderValidators.required(errorText: "Kolom Ini Dibutuhkan!"),
+          ],
+          onFieldSubmitted: (value) {},
+          decoration: _decorTextfield(context, "Nama Masjid", Icons.person),
+        ),
+        SizedBox(
+          height: 8,
+        ),
+        FormBuilderDateTimePicker(
+          attribute: "tanggal_target",
+          locale: Locale("id"),
+          inputType: InputType.date,
+          format: DateFormat("yyyy-MM-dd"),
+          decoration:
+              _decorTextfield(context, "Tanggal Target", MdiIcons.calendar),
+        ),
+        SizedBox(
+          height: 8,
+        ),
+        _buildButton(context),
+        SizedBox(
+          height: 5,
+        ),
+      ],
+    );
+  }
+
+  InputDecoration _decorTextfield(
+      BuildContext context, String labelName, IconData icon,
+      {Widget iconSuffix}) {
+    return InputDecoration(
+        labelText: labelName,
+        errorStyle: TextStyle(color: Colors.red),
+        prefixIcon: Icon(
+          icon,
+          color: Theme.of(context).primaryColor,
+        ),
+        suffixIcon: iconSuffix,
+        // labelStyle: TextStyle().copyWith(color: Theme.of(context).primaryColor),
+        // hintStyle: TextStyle().copyWith(color: Theme.of(context).primaryColor),
+        enabledBorder: mainTextfielBorder(
+          context,
+          borderSide: BorderSide(color: Colors.grey),
+        ),
+        focusedBorder: mainTextfielBorder(context),
+        errorBorder: mainTextfielBorder(context,
+            borderSide: BorderSide(
+              color: Colors.red,
+            )),
+        border: mainTextfielBorder(context, borderSide: null),
+        isDense: true);
+  }
+}

@@ -1,0 +1,225 @@
+import 'package:flutter/material.dart';
+
+///*********************************************
+/// Created by ukietux on 22/09/20 with ♥
+/// (>’_’)> email : ukie.tux@gmail.com
+/// github : https://www.github.com/ukieTux <(’_’<)
+///*********************************************
+/// © 2020 | All Right Reserved
+///
+/// Modified by awr on 03/10/2020
+/// email : dev@mt-elektrik.com
+/// github : https://www.github.com/Saepulawr
+/// -- add function onSubmited
+/// -- add margin
+/// -- add padding
+/// -- fix function onChanged
+/// -- add function onOpen
+/// -- add function onClose
+/// -- add keyState
+class AnimatedSearchBar extends StatefulWidget {
+  ///  label - String ,isRequired : No
+  ///  onChanged - Function(String)  ,isRequired : No
+  ///  labelStyle - TextStyle ,isRequired :  No
+  ///  searchDecoration - InputDecoration  ,isRequired : No
+  ///  animationDuration in milliseconds -  int ,isRequired : No
+  ///  searchStyle - TextStyle ,isRequired :  No
+  ///  cursorColor - Color ,isRequired : No
+  const AnimatedSearchBar({
+    Key key,
+    this.label = "",
+    this.onChanged(String query),
+    this.labelStyle = const TextStyle(
+      fontSize: 14,
+      fontWeight: FontWeight.bold,
+    ),
+    this.searchDecoration = const InputDecoration(
+        labelText: "Search",
+        alignLabelWithHint: true,
+        contentPadding: EdgeInsets.symmetric(vertical: 8, horizontal: 8),
+        border: const OutlineInputBorder(
+            borderRadius: BorderRadius.all(Radius.circular(8)), gapPadding: 4)),
+    this.animationDuration = 350,
+    this.searchStyle = const TextStyle(color: Colors.black),
+    this.cursorColor,
+    this.onSubmited(String query),
+    this.margin,
+    this.padding,
+    this.onOpen,
+    this.onClose,
+  }) : super(key: key);
+
+  final String label;
+  final Function onChanged;
+  final Function onSubmited;
+  final TextStyle labelStyle;
+  final InputDecoration searchDecoration;
+  final int animationDuration;
+  final TextStyle searchStyle;
+  final Color cursorColor;
+  final EdgeInsetsGeometry margin;
+  final EdgeInsetsGeometry padding;
+  final Function onOpen;
+  final Function onClose;
+  @override
+  AnimatedSearchBarState createState() => AnimatedSearchBarState();
+}
+
+class AnimatedSearchBarState extends State<AnimatedSearchBar> {
+  bool _isSearch = false;
+  var _fnSearch = FocusNode();
+  TextEditingController _ctl = TextEditingController();
+  void openSearch({String initialValue}) {
+    setState(() {
+      _ctl.text = initialValue;
+      _isSearch = true;
+    });
+    if (widget.onOpen != null) widget.onOpen();
+  }
+
+  void closeSearch() {
+    setState(() {
+      _ctl.text = "";
+      _isSearch = false;
+    });
+    if (widget.onClose != null) widget.onClose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    // Use row as Root view
+    return Expanded(
+      child: Container(
+        margin: widget.margin,
+        padding: widget.padding,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // Handle Animated Change view for Title and TextField Search
+            Expanded(
+                // Use animated Switcher to show animation in transition widget
+                child: AnimatedSwitcher(
+              duration: Duration(milliseconds: widget.animationDuration),
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                //animated from right to left
+                final inAnimation = Tween<Offset>(
+                        begin: Offset(1.0, 0.0), end: Offset(0.0, 0.0))
+                    .animate(animation);
+                //animated from left to right
+                final outAnimation = Tween<Offset>(
+                        begin: Offset(-1.0, 0.0), end: Offset(0.0, 0.0))
+                    .animate(animation);
+
+                // show different animation base on key
+                if (child.key == ValueKey("textF")) {
+                  return ClipRect(
+                    child: SlideTransition(position: inAnimation, child: child),
+                  );
+                } else {
+                  return ClipRect(
+                    child:
+                        SlideTransition(position: outAnimation, child: child),
+                  );
+                }
+              },
+              child: _isSearch
+                  ?
+                  //Container of SearchView
+                  SizedBox(
+                      key: ValueKey("textF"),
+                      height: 60,
+                      child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: TextFormField(
+                            controller: _ctl,
+                            focusNode: _fnSearch,
+                            keyboardType: TextInputType.text,
+                            textInputAction: TextInputAction.search,
+                            textAlign: TextAlign.start,
+                            style: widget.searchStyle,
+                            minLines: 1,
+                            maxLines: 1,
+                            cursorColor:
+                                widget.cursorColor ?? ThemeData().primaryColor,
+                            textAlignVertical: TextAlignVertical.center,
+                            decoration: widget.searchDecoration,
+                            onChanged: widget.onChanged,
+                            onFieldSubmitted: widget.onSubmited,
+                          )),
+                    )
+                  :
+                  //Container of Label
+                  Align(
+                      alignment: Alignment.centerLeft,
+                      child: FittedBox(
+                        fit: BoxFit.fitWidth,
+                        child: Text(
+                          widget.label,
+                          style: widget.labelStyle,
+                          textAlign: TextAlign.start,
+                        ),
+                      ),
+                    ),
+            )),
+            // Handle Animated Change view for Search Icon and Close Icon
+            IconButton(
+              icon:
+                  // Use animated Switcher to show animation in transition widget
+                  AnimatedSwitcher(
+                duration: Duration(milliseconds: 350),
+                transitionBuilder: (Widget child, Animation<double> animation) {
+                  //animated from top to bottom
+                  final inAnimation = Tween<Offset>(
+                          begin: Offset(0.0, 1.0), end: Offset(0.0, 0.0))
+                      .animate(animation);
+                  //animated from bottom to top
+                  final outAnimation = Tween<Offset>(
+                          begin: Offset(0.0, -1.0), end: Offset(0.0, 0.0))
+                      .animate(animation);
+
+                  // show different animation base on key
+                  if (child.key == ValueKey("close")) {
+                    return ClipRect(
+                      child: SlideTransition(
+                        position: inAnimation,
+                        child: child,
+                      ),
+                    );
+                  } else {
+                    return ClipRect(
+                      child:
+                          SlideTransition(position: outAnimation, child: child),
+                    );
+                  }
+                },
+                child: _isSearch
+                    ?
+                    //if is search, set icon as Close
+                    Icon(
+                        Icons.close,
+                        key: ValueKey("close"),
+                      ) //if is !search, set icon as Search
+                    : Icon(Icons.search, key: ValueKey("search")),
+              ),
+              onPressed: () {
+                setState(() {
+                  _isSearch = !_isSearch;
+                  if (_isSearch) {
+                    _fnSearch.requestFocus();
+                    if (widget.onOpen != null) widget.onOpen();
+                  } else {
+                    _ctl.text = "";
+                    if (widget.onClose != null) widget.onClose();
+                  }
+                  // if (!_isSearch && widget.onChanged != null)
+                  //   widget.onChanged("");
+                });
+              },
+            )
+          ],
+        ),
+      ),
+    );
+  }
+}

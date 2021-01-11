@@ -1,0 +1,66 @@
+import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:loginaja/dasboard/home.dart';
+import 'package:loginaja/dataArtikel/dataArtikel.dart';
+import 'package:loginaja/dataMajelis/dataMajelis.dart';
+import 'package:loginaja/src/public.dart';
+
+class TabBarScreen extends StatefulWidget {
+  TabBarScreen({
+    Key key,
+  }) : super(key: key);
+  @override
+  _TabBarState createState() => _TabBarState();
+}
+
+class _TabBarState extends State<TabBarScreen> {
+  int selectedPage = 0;
+  bool isLoaded = false;
+  final _pageOptions = [
+    HomePage(),
+    ListDataMajelis(),
+    ListDataArtikel(),
+  ];
+  void tanyakeluar() {
+    if (isLoaded) {
+      Navigator.of(context).pop();
+    } else {
+      showDialogTanya(
+          context: context,
+          colorButtonOK: Colors.red,
+          colorButtonCancel: Colors.green,
+          description: "Data Anda Tidak Tersimpan\nLanjutkan ?",
+          title: "Keluar",
+          onPressOK: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+          onPressCancel: () {
+            Navigator.of(context).pop();
+          });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () {
+        tanyakeluar();
+        return Future<bool>.value(false);
+      },
+      child: Scaffold(
+        body: _pageOptions[selectedPage],
+        bottomNavigationBar: ConvexAppBar(
+          backgroundColor: Theme.of(context).backgroundColor,
+          items: tabItems,
+          initialActiveIndex: 0, //optional, default as 0
+          onTap: (int i) {
+            setState(() {
+              selectedPage = i;
+            });
+          },
+        ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
+    );
+  }
+}

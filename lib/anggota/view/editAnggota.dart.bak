@@ -1,0 +1,303 @@
+import 'package:argon_buttons_flutter/argon_buttons_flutter.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_form_builder/flutter_form_builder.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
+import 'package:loginaja/anggota/api/dataUserApi.dart';
+import 'package:loginaja/auth/api/apiLogin.dart';
+import 'package:loginaja/src/api/api.dart';
+import 'package:loginaja/src/api/apiUrl.dart';
+import 'package:loginaja/src/public.dart';
+import 'package:loginaja/src/routes.dart';
+import 'package:loginaja/src/view/appbar.dart';
+import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
+class AddAnggota extends StatefulWidget {
+  final DataUser dataUser;
+  final int index;
+
+  const AddAnggota({Key key, this.dataUser, this.index}) : super(key: key);
+  @override
+  _AddAnggotaState createState() => _AddAnggotaState();
+}
+
+class _AddAnggotaState extends State<AddAnggota> {
+  final GlobalKey<FormBuilderState> _fbKey = GlobalKey<FormBuilderState>();
+  final FocusNode _judulFocusNode = FocusNode();
+  final FocusNode _isiFocusNode = FocusNode();
+  final FocusNode _penulisFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+  bool isSelectedImage = false;
+  bool isError = false;
+  bool isLoaded = false;
+  bool isSaving = false;
+  bool showpassword = false;
+
+  void tanyakeluar() {
+    if (isError) {
+      Navigator.of(context).pop();
+    } else {
+      showDialogTanya(
+          context: context,
+          colorButtonOK: Colors.red,
+          colorButtonCancel: Colors.green,
+          description: "Data Anda Tidak Tersimpan\nLanjutkan ?",
+          title: "Keluar",
+          onPressOK: () {
+            Navigator.of(context).pop();
+            Navigator.of(context).pop();
+          },
+          onPressCancel: () {
+            Navigator.of(context).pop();
+          });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return WillPopScope(
+      onWillPop: () {
+        tanyakeluar();
+        return Future.value(true);
+      },
+      child: Scaffold(
+        appBar: AppbarMain(
+          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+          title: "Tambah Anggota",
+        ),
+        body: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: FormBuilder(
+            key: _fbKey,
+            initialValue: {},
+            child: ListView(
+              shrinkWrap: true,
+              children: [
+                FormBuilderTextField(
+                    attribute: "full_name",
+                    readOnly: isSaving,
+                    textInputAction: TextInputAction.next,
+                    focusNode: _penulisFocusNode,
+                    validators: [
+                      FormBuilderValidators.required(
+                          errorText: "Kolom Ini Dibutuhkan!"),
+                    ],
+                    onFieldSubmitted: (value) {
+                      _penulisFocusNode.unfocus();
+                      FocusScope.of(context).requestFocus(_passwordFocusNode);
+                    },
+                    decoration: _decorTextfield(
+                      context,
+                      "Nama Lengkap",
+                    )),
+                SizedBox(
+                  height: 10,
+                ),
+                FormBuilderTextField(
+                    attribute: "email",
+                    readOnly: isSaving,
+                    textInputAction: TextInputAction.next,
+                    focusNode: _isiFocusNode,
+                    validators: [
+                      FormBuilderValidators.required(
+                          errorText: "Kolom Ini Dibutuhkan!"),
+                    ],
+                    onFieldSubmitted: (value) {
+                      _isiFocusNode.unfocus();
+                      FocusScope.of(context).requestFocus(_penulisFocusNode);
+                    },
+                    decoration: _decorTextfield(
+                      context,
+                      "Alamat Email",
+                    )),
+                SizedBox(
+                  height: 10,
+                ),
+                FormBuilderTextField(
+                    attribute: "username",
+                    readOnly: isSaving,
+                    textInputAction: TextInputAction.next,
+                    focusNode: _judulFocusNode,
+                    validators: [
+                      FormBuilderValidators.required(
+                          errorText: "Kolom Ini Dibutuhkan!"),
+                    ],
+                    onFieldSubmitted: (value) {
+                      _judulFocusNode.unfocus();
+                      FocusScope.of(context).requestFocus(_isiFocusNode);
+                    },
+                    decoration: _decorTextfield(
+                      context,
+                      "username",
+                    )),
+                SizedBox(
+                  height: 10,
+                ),
+                FormBuilderTextField(
+                  obscureText: !showpassword,
+                  attribute: "password",
+                  textInputAction: TextInputAction.done,
+                  focusNode: _passwordFocusNode,
+                  validators: [
+                    FormBuilderValidators.required(
+                        errorText: "Kolom Ini Dibutuhkan!")
+                  ],
+                  decoration: _decorTextfield(
+                    context,
+                    "Kata Sandi",
+                    iconSuffix: GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          showpassword = !showpassword;
+                        });
+                      },
+                      child:
+                          Icon(showpassword ? MdiIcons.eyeOff : MdiIcons.eye),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 10,
+                ),
+                _buildButton(context)
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildButton(BuildContext context) {
+    return Container(
+      alignment: Alignment.centerRight,
+      child: FittedBox(
+        fit: BoxFit.fitWidth,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.end,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ArgonButton(
+              height: 50,
+              width: 100,
+              borderRadius: 10,
+              elevation: 0,
+              color: Colors.red,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.cancel,
+                    color: Colors.white,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "Batal",
+                    style: TextStyle().copyWith(color: Colors.white),
+                  )
+                ],
+              ),
+              onTap: (startLoading, stopLoading, btnState) {
+                if (!isSaving) tanyakeluar();
+              },
+            ),
+            SizedBox(
+              width: 10,
+            ),
+            ArgonButton(
+              height: 50,
+              width: 100,
+              borderRadius: 10,
+              elevation: 0,
+              color: Theme.of(context).primaryColor,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    MdiIcons.contentSave,
+                    color: Colors.white,
+                  ),
+                  SizedBox(
+                    width: 5,
+                  ),
+                  Text(
+                    "Simpan",
+                    style: TextStyle().copyWith(color: Colors.white),
+                  )
+                ],
+              ),
+              roundLoadingShape: false,
+              minWidth: 100,
+              loader: SpinKitThreeBounce(
+                color: Colors.white,
+                size: 30,
+              ),
+              onTap: (startLoading, stopLoading, btnState) async {
+                if (btnState == ButtonState.Idle) {
+                  if (_fbKey.currentState.saveAndValidate()) {
+                    setState(() {
+                      isSaving = true;
+                    });
+                    startLoading();
+                    await postData(
+                      url: urlApi.addAnggota,
+                      data: {
+                        "full_name": _fbKey.currentState.value['full_name'],
+                        "email": _fbKey.currentState.value['email'],
+                        "username": _fbKey.currentState.value['username'],
+                        "password": _fbKey.currentState.value['password'],
+                        "date_created": DateTime.now(),
+                        "id_masjid": dataLogin.data.idMasjid
+                      },
+                      onComplete: (data, statusCode) {
+                        print(data);
+                        Navigator.of(context).pushReplacementNamed(
+                            getRoutesName(RoutesName.dataAnggota));
+                        showSuccessFlushbar(
+                            context: context,
+                            title: "Sukses",
+                            message: "Data Berhasil Disimpan.");
+                      },
+                      onError: (error) {
+                        setState(() {
+                          isSaving = false;
+                        });
+                        print(error);
+
+                        stopLoading();
+                        showErrorFlushbar(
+                            context: context,
+                            title: "Error",
+                            message:
+                                "Data Tidak Dapat Disimpan!\nHarap Periksa Koneksi Internet Anda,Dan Coba Lagi.");
+                      },
+                    );
+                  }
+                }
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  InputDecoration _decorTextfield(BuildContext context, String labelName,
+      {Widget iconSuffix}) {
+    return InputDecoration(
+        labelText: labelName,
+        suffixIcon: iconSuffix,
+        labelStyle: TextStyle(color: Colors.white),
+        errorStyle: TextStyle(color: Colors.red),
+        enabledBorder: mainTextfielBorder(context,
+            borderSide: BorderSide(color: Colors.grey)),
+        focusedBorder: mainTextfielBorder(context),
+        errorBorder: mainTextfielBorder(context,
+            borderSide: BorderSide(
+              color: Colors.red,
+            )),
+        border: mainTextfielBorder(context, borderSide: null),
+        isDense: true);
+  }
+}
